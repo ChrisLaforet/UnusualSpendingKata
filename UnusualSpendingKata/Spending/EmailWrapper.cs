@@ -3,6 +3,10 @@ namespace UnusualSpendingKata.Spending;
 public class EmailWrapper
 {
     private bool isProduction = true;
+    
+    public int? LastUserId { get; private set; }
+    public string? LastSubject { get; private set; }
+    public string? LastBody { get; private set; }
 
     public static EmailWrapper CreateForTesting()
     {
@@ -22,5 +26,9 @@ public class EmailWrapper
         {
             EmailsUser.Email(userId, subject, body);
         }
+
+        LastUserId = userId;
+        LastSubject = subject;
+        LastBody = body;
     }
 }

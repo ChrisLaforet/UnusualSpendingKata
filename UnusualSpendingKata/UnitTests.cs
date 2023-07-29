@@ -8,15 +8,13 @@ namespace UnusualSpendingKata;
 
 public class UnitTests
 {
-    private TriggersUnusualSpendingEmail systemUnderTest = new TriggersUnusualSpendingEmail(EmailWrapper.CreateForTesting());
-
     private const int INACTIVE_USER_ID = 0;
     private const int ACTIVE_USER_ID = 1;
     
     [Fact]
-    public void givenSystemUnderTest_whenTriggeredWithInactiveUserId_thenDoesNothing()
-    {
-        systemUnderTest.Trigger(INACTIVE_USER_ID);
-        
+    public void givenSystemUnderTest_whenTriggeredWithInactiveUserId_thenReturnsEmptyBody()
+    { 
+        var body = TriggerWrapper.TriggerForTesting(INACTIVE_USER_ID);
+        Assert.Null(body);
     }
 }
