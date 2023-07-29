@@ -1,3 +1,5 @@
+using UnusualSpendingKata.Spending;
+
 namespace UnusualSpendingKata;
 
 // Instructions are here: https://kata-log.rocks/unusual-spending-kata
@@ -6,9 +8,15 @@ namespace UnusualSpendingKata;
 
 public class UnitTests
 {
+    private TriggersUnusualSpendingEmail systemUnderTest = new TriggersUnusualSpendingEmail(EmailWrapper.CreateForTesting());
+
+    private const int INACTIVE_USER_ID = 0;
+    private const int ACTIVE_USER_ID = 1;
+    
     [Fact]
-    public void Test1()
+    public void givenSystemUnderTest_whenTriggeredWithInactiveUserId_thenDoesNothing()
     {
+        systemUnderTest.Trigger(INACTIVE_USER_ID);
         
     }
 }
