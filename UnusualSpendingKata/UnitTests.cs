@@ -9,12 +9,21 @@ namespace UnusualSpendingKata;
 public class UnitTests
 {
     private const int INACTIVE_USER_ID = 0;
-    private const int ACTIVE_USER_ID = 1;
+    private const int NO_SPENDING_USER_ID = 1;
+    private const int EQUAL_SPENDING_USER_ID = 2;
+    private const int UNUSUAL_SPENDING_USER_ID = 3;
     
     [Fact]
     public void givenSystemUnderTest_whenTriggeredWithInactiveUserId_thenReturnsEmptyBody()
     { 
         var body = TriggerWrapper.TriggerForTesting(INACTIVE_USER_ID);
         Assert.Null(body);
+    }
+
+    [Fact]
+    public void givenSystemUnderTest_whenTriggeredWithUserWithoutSpendingThisMonth_thenReturnsMessageBody()
+    {
+        var body = TriggerWrapper.TriggerForTesting(NO_SPENDING_USER_ID);
+
     }
 }

@@ -11,7 +11,7 @@ public class FetchesUserPaymentsByMonth
         
     private FetchesUserPaymentsByMonth() {}
 
-    private static FetchesUserPaymentsByMonth GetInstance()
+    public static FetchesUserPaymentsByMonth GetInstance()
     {
         // some painful processing here that requires connectivity data
         return null;            // to prohibit us from using this in our unit tests
