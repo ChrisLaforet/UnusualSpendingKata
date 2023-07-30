@@ -4,5 +4,6 @@ public enum Category
 {
     Entertainment,
     Restaurants,
-    Golf// Details are here: 
+    Gas,
+    Golf 
 }

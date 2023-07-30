@@ -2,7 +2,8 @@ namespace UnusualSpendingKata.Spending;
 
 public class TriggerWrapper
 {
-    private TriggerWrapper() {}
+    private readonly UserPaymentsWrapper paymentService;
+    private TriggerWrapper(UserPaymentsWrapper paymentService) => this.paymentService = paymentService;
     
     public static string? TriggerForTesting(int userId)
     {
