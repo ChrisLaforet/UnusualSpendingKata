@@ -4,7 +4,7 @@ public abstract class UserPaymentsWrapper
 {
     private readonly FetchesUserPaymentsByMonth? paymentService;
     
-    public static UserPaymentsWrapper CreateForTesting(Dictionary<int, IEnumerable<Payment>> paymentDatabase)
+    public static UserPaymentsWrapper CreateForTesting(Dictionary<long, IEnumerable<DatedPayment>> paymentDatabase)
     {
         return new TestingPaymentsWrapper(paymentDatabase);
     }
@@ -16,18 +16,24 @@ public abstract class UserPaymentsWrapper
 
     protected UserPaymentsWrapper() {}
 
-    public abstract IEnumerable<Payment> Fetch(int userId, int year, int month);
+    public abstract IEnumerable<Payment> Fetch(long userId, int year, int month);
 }
 
 internal class TestingPaymentsWrapper : UserPaymentsWrapper
 {
-    private readonly Dictionary<int, IEnumerable<Payment>> paymentDatabase;
+    private readonly Dictionary<long, IEnumerable<DatedPayment>> paymentDatabase;
     
-    public TestingPaymentsWrapper(Dictionary<int, IEnumerable<Payment>> paymentDatabase) => this.paymentDatabase = paymentDatabase;
+    public TestingPaymentsWrapper(Dictionary<long, IEnumerable<DatedPayment>> paymentDatabase) => this.paymentDatabase = paymentDatabase;
 
-    public override IEnumerable<Payment> Fetch(int userId, int year, int month)
+    public override IEnumerable<Payment> Fetch(long userId, int year, int month)
     {
-        return new List<Payment>();
+        var response = new List<Payment>();
+        if (paymentDatabase.ContainsKey(userId))
+        {
+            var matches = paymentDatabase[userId].Where(payment => payment.Month == month && payment.Year == year).ToList();
+            response.AddRange(matches);
+        }
+        return response;
     }
 }
 
@@ -37,7 +43,7 @@ internal class ProductionPaymentsWrapper : UserPaymentsWrapper
     
     public ProductionPaymentsWrapper() {}
     
-    public override IEnumerable<Payment> Fetch(int userId, int year, int month)
+    public override IEnumerable<Payment> Fetch(long userId, int year, int month)
     {
         return paymentService.Fetch(userId, year, month);
     }

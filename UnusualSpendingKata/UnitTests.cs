@@ -1,4 +1,5 @@
 using UnusualSpendingKata.Spending;
+using System;
 
 namespace UnusualSpendingKata;
 
@@ -11,48 +12,86 @@ public class UnitTests
     private const int INACTIVE_USER_ID = 0;
     private const int NON_SPENDING_USER_ID = 1;
     private const int EQUAL_SPENDING_USER_ID = 2;
-    private const int UNUSUAL_SPENDING_USER_ID = 3;
+    private const int NEW_SPENDING_USER_ID = 3;
+    private const int NO_SPENDING_THIS_MONTH_USER_ID = 4;
+    private const int SUSPICIOUS_SPENDING_USER_ID = 5;
 
-    private const int LAST_MONTH = 5;
-    private const int THIS_MONTH = LAST_MONTH + 1;
-    private const int YEAR = 2023;
+    private readonly SpendingDate spendingDate = new SpendingDate();
+    
     
     [Fact]
-    public void givenSystemUnderTest_whenTriggeredWithInactiveUserId_thenReturnsEmptyBody()
+    public void GivenTrigger_WhenTriggeredWithInactiveUserId_ThenReturnsEmptyBody()
     { 
-        var body = TriggerWrapper.TriggerForTesting(INACTIVE_USER_ID);
+        var body = TriggerWrapper.TriggerForTesting(INACTIVE_USER_ID, PrepareDatabase());
         Assert.Null(body);
     }
 
     [Fact]
-    public void givenSystemUnderTest_whenTriggeredWithUserWithoutSpendingThisMonth_thenReturnsEmptyMessageBody()
+    public void GivenTrigger_WhenTriggeredWithUserWithoutSpendingThisMonth_ThenReturnsEmptyMessageBody()
     {
-        var body = TriggerWrapper.TriggerForTesting(NON_SPENDING_USER_ID);
+        var body = TriggerWrapper.TriggerForTesting(NON_SPENDING_USER_ID, PrepareDatabase());
         Assert.Null(body);
+    }
+
+    [Fact]
+    public void GivenUserPaymentsWrapperWithUserThatHasNoPayments_WhenFetchingPayments_ThenReturnsEmptyList()
+    {
+        var service = UserPaymentsWrapper.CreateForTesting(PrepareDatabase());
+        Assert.False(service.Fetch(NON_SPENDING_USER_ID, spendingDate.LastMonthYear, spendingDate.LastMonth).Any());
     }
     
     [Fact]
-    public void givenSystemUnderTest_whenTriggeredWithUserWithEqualSpendingThisMonth_thenReturnsEmptyMessageBody()
+    public void GivenUserPaymentsWrapperWithUserThatHasPayments_WhenFetchingPayments_ThenReturnsList()
     {
-        var body = TriggerWrapper.TriggerForTesting(EQUAL_SPENDING_USER_ID);
+        var service = UserPaymentsWrapper.CreateForTesting(PrepareDatabase());
+        Assert.True(service.Fetch(EQUAL_SPENDING_USER_ID, spendingDate.LastMonthYear, spendingDate.LastMonth).Any());
+    }
+    
+    [Fact]
+    public void GivenTrigger_WhenTriggeredWithUserWithEqualSpendingThisMonth_ThenReturnsEmptyMessageBody()
+    {
+        var body = TriggerWrapper.TriggerForTesting(EQUAL_SPENDING_USER_ID, PrepareDatabase());
         Assert.Null(body);
     }
 
-    private Dictionary<int, IEnumerable<DatedPayment>> prepareDatabase()
+    [Fact]
+    public void GivenTrigger_WhenTriggeredWithUserWithNewSpendingThisMonth_ThenReturnsMessageBody()
     {
-        var equalUserPayments = new List<Payment>();
-        equalUserPayments.Add(new DatedPayment(LAST_MONTH, YEAR, 50, "Dinner", Category.Restaurants));
-        equalUserPayments.Add(new DatedPayment(LAST_MONTH, YEAR, 25, "Lunch", Category.Restaurants));
-        equalUserPayments.Add(new DatedPayment(LAST_MONTH, YEAR, 65, "Fill'r Up", Category.Gas));
-        
-        equalUserPayments.Add(new DatedPayment(THIS_MONTH, YEAR, 68, "Fill'r Up", Category.Gas));
-        equalUserPayments.Add(new DatedPayment(LAST_MONTH, YEAR, 20, "Breakfast", Category.Restaurants));
-        equalUserPayments.Add(new DatedPayment(LAST_MONTH, YEAR, 30, "Lunch", Category.Restaurants));
-        equalUserPayments.Add(new DatedPayment(LAST_MONTH, YEAR, 18, "Breakfast", Category.Restaurants));
+        var body = TriggerWrapper.TriggerForTesting(NEW_SPENDING_USER_ID, PrepareDatabase());
+        Assert.NotNull(body);
+    }
 
-        var paymentDatabase = new Dictionary<int, IEnumerable<DatedPayment>>();
-        paymentDatabase[EQUAL_SPENDING_USER_ID] = equalUserPayments;
+    private Dictionary<long, IEnumerable<DatedPayment>> PrepareDatabase()
+    {
+        var paymentDatabase = new Dictionary<long, IEnumerable<DatedPayment>>();
+        paymentDatabase[EQUAL_SPENDING_USER_ID] = PrepareEqualPaymentUserData();
+        paymentDatabase[NEW_SPENDING_USER_ID] = PrepareNewPaymentUserData();
 
         return paymentDatabase;
+    }
+
+    private List<DatedPayment> PrepareEqualPaymentUserData()
+    {
+        var payments = new List<DatedPayment>();
+        payments.Add(new DatedPayment(spendingDate.LastMonth, spendingDate.LastMonthYear, 50, "Dinner", Category.Restaurants));
+        payments.Add(new DatedPayment(spendingDate.LastMonth, spendingDate.LastMonthYear, 25, "Lunch", Category.Restaurants));
+        payments.Add(new DatedPayment(spendingDate.LastMonth, spendingDate.LastMonthYear, 65, "Fill'r Up", Category.Gas));
+
+        payments.Add(new DatedPayment(spendingDate.ThisMonth, spendingDate.ThisMonthYear, 68, "Fill'r Up", Category.Gas));
+        payments.Add(new DatedPayment(spendingDate.ThisMonth, spendingDate.ThisMonthYear, 20, "Breakfast", Category.Restaurants));
+        payments.Add(new DatedPayment(spendingDate.ThisMonth, spendingDate.ThisMonthYear, 30, "Lunch", Category.Restaurants));
+        payments.Add(new DatedPayment(spendingDate.ThisMonth, spendingDate.ThisMonthYear, 18, "Breakfast", Category.Restaurants));
+        return payments;
+    }
+    
+    
+    private List<DatedPayment> PrepareNewPaymentUserData()
+    {
+        var payments = new List<DatedPayment>();
+        payments.Add(new DatedPayment(spendingDate.ThisMonth, spendingDate.ThisMonthYear, 68, "Fill'r Up", Category.Gas));
+        payments.Add(new DatedPayment(spendingDate.ThisMonth, spendingDate.ThisMonthYear, 20, "Breakfast", Category.Restaurants));
+        payments.Add(new DatedPayment(spendingDate.ThisMonth, spendingDate.ThisMonthYear, 30, "Lunch", Category.Restaurants));
+        payments.Add(new DatedPayment(spendingDate.ThisMonth, spendingDate.ThisMonthYear, 18, "Breakfast", Category.Restaurants));
+        return payments;
     }
 }

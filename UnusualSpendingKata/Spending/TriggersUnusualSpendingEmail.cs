@@ -8,11 +8,21 @@ public class TriggersUnusualSpendingEmail
     // (maybe a job scheduler system) is depending on
 
     private readonly EmailWrapper emailService;
+    private readonly UserPaymentsWrapper userPaymentService;
 
-    public TriggersUnusualSpendingEmail(EmailWrapper emailService) => this.emailService = emailService;
+    public TriggersUnusualSpendingEmail(EmailWrapper emailService, UserPaymentsWrapper userPaymentService)
+    {
+        this.emailService = emailService;
+        this.userPaymentService = userPaymentService;
+    }
 
     public void Trigger(long userId)
     {
-            
+        var spendingDate = new SpendingDate();
+        var lastMonth = userPaymentService.Fetch(userId, spendingDate.LastMonthYear, spendingDate.LastMonth);
+       // var lastMonthSpend = lastMonth.Select(payment => payment.Price).Sum();
+        var thisMonth = userPaymentService.Fetch(userId, spendingDate.ThisMonthYear, spendingDate.ThisMonth);
+        //var thisMonthSpend = thisMonth.Select(payment => payment.Price).Sum();
+
     }
 }

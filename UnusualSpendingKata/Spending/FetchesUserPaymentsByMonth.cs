@@ -17,7 +17,7 @@ public class FetchesUserPaymentsByMonth
         return null;            // to prohibit us from using this in our unit tests
     }
     
-    public IEnumerable<Payment> Fetch(int userId, int year, int month)
+    public IEnumerable<Payment> Fetch(long userId, int year, int month)
     {
         // some magic vendor-provided voodoo here - we have no control over it
         return new List<Payment>();
