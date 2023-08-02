@@ -5,5 +5,5 @@ public enum Category
     Entertainment,
     Restaurants,
     Gas,
-    Golf 
+    Travel 
 }
